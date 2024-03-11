@@ -1,5 +1,6 @@
 ---
-
+import { Image } from "astro:assets";
+import logo from '../images/logo.png'
 ---
 
 <html lang="en">
@@ -12,5 +13,6 @@
 	</head>
 	<body>
 		<h1 class="text-4xl">Astro</h1>
+		<Image src={logo} alt={"logo"}/>
 	</body>
 </html>
