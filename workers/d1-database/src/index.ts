@@ -37,6 +37,7 @@ export interface Env {
 				id: userId,
 				name: faker.person.fullName(),
 				username: faker.internet.userName(),
+				// username: "Lorine.Ernser",
 				hashedPassword: toHex(hashedPassword),
 			}).execute();
 			
@@ -49,13 +50,13 @@ export interface Env {
 				status: 302,
 				headers: {
 					Location: "/",
-					"Set-Cookie": sessionCookie.serialize()
+					"Set-Cookie": sessionCookie.serialize(),					
 				}
 			});
-		} catch (e) {
+		} catch (e: any) {
 			// db error, email taken, etc
-			console.log(e);
-			return new Response("Email already used", {
+			console.log(e.cause.message);
+			return new Response("Username already exists", {
 				status: 400
 			});
 		}
