@@ -1,0 +1,34 @@
+{
+  "version": "5",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1710119317604,
+      "tag": "0000_familiar_stingray",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1710124683230,
+      "tag": "0001_sticky_rhodey",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1710125490290,
+      "tag": "0002_white_santa_claus",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1710125523091,
+      "tag": "0003_material_vampiro",
+      "breakpoints": true
+    }
+  ]
+}

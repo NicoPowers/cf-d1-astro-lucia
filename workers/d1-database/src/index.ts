@@ -1,10 +1,11 @@
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
+import { initializeLucia } from "./utils/auth"
 import { drizzle } from 'drizzle-orm/d1'
-import { users } from './schema';
-
+import { user } from './schema';
 import { faker } from '@faker-js/faker';
-
-
+import { generateId } from "lucia";
+import { argon2id} from "@noble/hashes/argon2";
+import { bytesToHex as toHex, randomBytes } from '@noble/hashes/utils';
 
 export interface Env {
 	// If you set another name in wrangler.toml as the value for 'binding',
@@ -16,23 +17,49 @@ export interface Env {
 	async fetch(request: Request, env: Env) {
 	  const { pathname } = new URL(request.url);
   
-	  if (pathname === "/api/beverages") {
+	  if (pathname === "/users") {
 		const db = drizzle(env.DB);
 
 		// If you did not use `DB` as your binding name, change it here
-		const results = await db.select().from(users).all()
+		const results = await db.select().from(user).all()
 		return Response.json(results);
 	  }
 
-	  if (pathname === "/api/seed") {
-		// generate 10 fake users
-		// each user just needs an id of type text (lets just use a uuid)
+	  if (pathname === "/signup") {
+		// Now you can use the generated salt with argon2id
+		const hashedPassword = argon2id('password', toHex(randomBytes(32)), { t: 1, m: 65536, p: 1 });
+		const userId = generateId(15);
+
 		const db = drizzle(env.DB);
-		for (let i = 0; i < 10; i++) {
-			const id = faker.string.uuid();
-			await db.insert(users).values({ id }).execute();
-	  	}
-		return new Response("10 fake users seeded");
+
+		try {
+			await db.insert(user).values({
+				id: userId,
+				name: faker.person.fullName(),
+				username: faker.internet.userName(),
+				hashedPassword: toHex(hashedPassword),
+			}).execute();
+			
+			const lucia = initializeLucia(env.DB);
+			const session = await lucia.createSession(userId, {});
+			console.log("Created Session", session.id)
+			const sessionCookie = lucia.createSessionCookie(session.id);
+			console.log("Created Cookie", sessionCookie.serialize())
+			return new Response(null, {
+				status: 302,
+				headers: {
+					Location: "/",
+					"Set-Cookie": sessionCookie.serialize()
+				}
+			});
+		} catch (e) {
+			// db error, email taken, etc
+			console.log(e);
+			return new Response("Email already used", {
+				status: 400
+			});
+		}
+
 	  }
 
   

@@ -1,8 +1,18 @@
-import { sql } from "drizzle-orm";
-import { text, integer, sqliteTable } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm"
+import { sqliteTable, text, int } from "drizzle-orm/sqlite-core"
 
-export const users = sqliteTable('users', {
-  id: text('id'),
-  textModifiers: text('text_modifiers').notNull().default(sql`CURRENT_TIMESTAMP`),
-  intModifiers: integer('int_modifiers', { mode: 'boolean' }).notNull().default(false),
-});
+export const user = sqliteTable("user", {
+  id: text("id").primaryKey(),
+  name: text("name"),
+  username: text("username").unique().notNull().default("NULL"),
+  hashedPassword: text("hashed_password"),
+})
+
+export const session = sqliteTable("session", {
+  id: text("id").primaryKey(),
+  expiresAt: int("expires_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" })
+    .default("NULL"),
+})
